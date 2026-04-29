@@ -224,7 +224,7 @@ const MyRoutes = ({ user }) => {
 
                   <div className="space-y-2 text-sm text-slate-700">
                     <p>
-                      <span className="font-semibold">Date:</span>{" "}
+                      <span className="font-semibold">Arrival Date:</span>{" "}
                       {route.arrivalDate}
                     </p>
                     <p>
