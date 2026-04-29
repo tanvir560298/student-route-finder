@@ -4,12 +4,26 @@ import { auth } from "../auth";
 const AddRoute = () => {
   const [message, setMessage] = useState("");
   const [districts, setDistricts] = useState([]);
+  const [districtInput, setDistrictInput] = useState("");
+  const [vehicleTypes, setVehicleTypes] = useState([]);
 
   useEffect(() => {
     fetch("/data/districts.json")
       .then((res) => res.json())
       .then((data) => setDistricts(data));
   }, []);
+
+  const filteredDistricts = districts.filter((district) =>
+    district.toLowerCase().includes(districtInput.toLowerCase())
+  );
+
+  const handleVehicleChange = (vehicle) => {
+    setVehicleTypes((prev) =>
+      prev.includes(vehicle)
+        ? prev.filter((item) => item !== vehicle)
+        : [...prev, vehicle]
+    );
+  };
 
   const handleAddRoute = (e) => {
     e.preventDefault();
@@ -21,6 +35,16 @@ const AddRoute = () => {
       return;
     }
 
+    if (!districtInput) {
+      setMessage("Please select your district.");
+      return;
+    }
+
+    if (vehicleTypes.length === 0) {
+      setMessage("Please select at least one vehicle option.");
+      return;
+    }
+
     const form = e.target;
 
     if (form.university.value === "Other") {
@@ -28,22 +52,25 @@ const AddRoute = () => {
       return;
     }
 
+    const arrivalTime = `${form.arrivalHour.value}:${form.arrivalMinute.value}`;
+
     const routeData = {
       name: user.displayName,
       email: user.email,
       university: form.university.value,
-      district: form.district.value,
+      district: districtInput,
       arrivalDate: form.arrivalDate.value,
-      arrivalTime: form.arrivalTime.value,
+      arrivalTime,
       phone: form.phone.value,
       tripType: form.tripType.value,
-      vehicleType: form.vehicleType.value,
+      vehicleTypes,
+      vehicleType: vehicleTypes.join(", "),
       peopleNeeded: form.peopleNeeded.value,
       note: form.note.value,
       status: "open",
     };
 
-    fetch(`${import.meta.env.VITE_API_URL}/routes`,  {
+    fetch(`${import.meta.env.VITE_API_URL}/routes`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -55,12 +82,43 @@ const AddRoute = () => {
         if (data.insertedId) {
           setMessage("Trip created successfully!");
           form.reset();
+          setDistrictInput("");
+          setVehicleTypes([]);
         }
+      })
+      .catch((error) => {
+        console.log(error);
+        setMessage("Something went wrong.");
       });
   };
 
   const inputClass =
     "w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+
+  const vehicleOptions = [
+    { label: "Bus", value: "bus" },
+    { label: "Car", value: "car" },
+    { label: "Microbus", value: "microbus" },
+  ];
+
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    String(i).padStart(2, "0")
+  );
+
+  const minutes = [
+    "00",
+    "05",
+    "10",
+    "15",
+    "20",
+    "25",
+    "30",
+    "35",
+    "40",
+    "45",
+    "50",
+    "55",
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
@@ -69,9 +127,7 @@ const AddRoute = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
             Create Your Trip
           </h1>
-          <p className="text-slate-500 mt-2">
-            সফরসঙ্গী খুঁজুন সহজেই 🚀
-          </p>
+          <p className="text-slate-500 mt-2">সফরসঙ্গী খুঁজুন সহজেই 🚀</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 md:p-8">
@@ -96,49 +152,90 @@ const AddRoute = () => {
               </select>
             </div>
 
-            <div>
+            <div className="relative">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 District
               </label>
+
               <input
-                name="district"
-                list="district-list"
+                value={districtInput}
+                onChange={(e) => setDistrictInput(e.target.value)}
                 placeholder="Search your district"
                 required
+                autoComplete="off"
                 className={inputClass}
               />
 
-              <datalist id="district-list">
-                {districts.map((d) => (
-                  <option key={d} value={d} />
-                ))}
-              </datalist>
+              {districtInput && filteredDistricts.length > 0 && (
+                <div className="absolute z-50 mt-2 w-full max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  {filteredDistricts.map((district) => (
+                    <button
+                      type="button"
+                      key={district}
+                      onClick={() => setDistrictInput(district)}
+                      className="block w-full text-left px-4 py-3 text-sm hover:bg-blue-50"
+                    >
+                      {district}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="grid md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Arrival Date
-                </label>
-                <input
-                  name="arrivalDate"
-                  type="date"
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Arrival Date
+              </label>
+              <input
+                type="date"
+                name="arrivalDate"
+                required
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Arrival Time
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  name="arrivalHour"
                   required
+                  defaultValue=""
                   className={inputClass}
-                />
+                >
+                  <option value="" disabled>
+                    Hour
+                  </option>
+                  {hours.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  name="arrivalMinute"
+                  required
+                  defaultValue=""
+                  className={inputClass}
+                >
+                  <option value="" disabled>
+                    Minute
+                  </option>
+                  {minutes.map((minute) => (
+                    <option key={minute} value={minute}>
+                      {minute}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Arrival Time
-                </label>
-                <input
-                  name="arrivalTime"
-                  type="time"
-                  required
-                  className={inputClass}
-                />
-              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Time uses 24-hour format. Example: 14:30 means 2:30 PM.
+              </p>
             </div>
 
             <div>
@@ -157,7 +254,12 @@ const AddRoute = () => {
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Trip Type
               </label>
-              <select name="tripType" required defaultValue="" className={inputClass}>
+              <select
+                name="tripType"
+                required
+                defaultValue=""
+                className={inputClass}
+              >
                 <option value="" disabled>
                   Select trip type
                 </option>
@@ -166,31 +268,42 @@ const AddRoute = () => {
               </select>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Vehicle Type
-                </label>
-                <select name="vehicleType" defaultValue="" className={inputClass}>
-                  <option value="" disabled>
-                    Select vehicle
-                  </option>
-                  <option value="bus">Bus</option>
-                  <option value="car">Car</option>
-                  <option value="microbus">Microbus</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
+                Preferred Vehicle Options
+              </label>
 
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  People Needed
-                </label>
-                <input
-                  name="peopleNeeded"
-                  placeholder="Example: 3"
-                  className={inputClass}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {vehicleOptions.map((vehicle) => (
+                  <label
+                    key={vehicle.value}
+                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition ${
+                      vehicleTypes.includes(vehicle.value)
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-slate-200 bg-white text-slate-700"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={vehicleTypes.includes(vehicle.value)}
+                      onChange={() => handleVehicleChange(vehicle.value)}
+                      className="h-4 w-4"
+                    />
+                    <span className="font-medium">{vehicle.label}</span>
+                  </label>
+                ))}
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                People Needed
+              </label>
+              <input
+                name="peopleNeeded"
+                placeholder="Example: 3"
+                className={inputClass}
+              />
             </div>
 
             <div>
@@ -207,14 +320,20 @@ const AddRoute = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition"
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
             >
               Create Trip
             </button>
           </form>
 
           {message && (
-            <p className="mt-5 text-center font-medium text-green-600">
+            <p
+              className={`mt-5 text-center font-medium ${
+                message.includes("successfully")
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
               {message}
             </p>
           )}

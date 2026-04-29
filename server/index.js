@@ -64,7 +64,12 @@ app.post("/routes", async (req, res) => {
     const db = await getDatabase();
     const routesCollection = db.collection("routes");
 
-    const routeData = req.body;
+    const routeData = {
+      ...req.body,
+      status: req.body.status || "open",
+      createdAt: req.body.createdAt || new Date().toISOString(),
+    };
+
     const result = await routesCollection.insertOne(routeData);
     res.send(result);
   } catch (error) {
@@ -107,6 +112,11 @@ app.put("/routes/:id", async (req, res) => {
           arrivalDate: updatedRoute.arrivalDate,
           arrivalTime: updatedRoute.arrivalTime,
           phone: updatedRoute.phone,
+          tripType: updatedRoute.tripType,
+          vehicleTypes: updatedRoute.vehicleTypes,
+          vehicleType: updatedRoute.vehicleType,
+          peopleNeeded: updatedRoute.peopleNeeded,
+          note: updatedRoute.note,
         },
       }
     );
