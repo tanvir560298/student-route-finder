@@ -172,12 +172,7 @@ function App() {
             })}
           </div>
 
-          {newRequestsCount > 0 && location.pathname !== "/interested-students" && (
-            <div className="fixed top-20 right-4 z-50 bg-white border border-slate-200 shadow-lg rounded-2xl px-4 py-3 text-sm">
-              🔔 You have {newRequestsCount} new request
-              {newRequestsCount > 1 ? "s" : ""}
-            </div>
-          )}
+          
         </header>
       )}
 
