@@ -17,6 +17,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [newRequestsCount, setNewRequestsCount] = useState(0);
   const location = useLocation();
 
   const hideNavbar = location.pathname === "/" || location.pathname === "/login";
@@ -39,8 +40,53 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      setNewRequestsCount(0);
+      return;
+    }
+
+    const loadNewRequests = () => {
+      fetch(`${import.meta.env.VITE_API_URL}/interested`)
+        .then((res) => res.json())
+        .then((data) => {
+          const pendingRequests = data.filter(
+            (item) =>
+              item.routeOwnerEmail === user.email &&
+              (!item.status || item.status === "pending")
+          );
+
+          setNewRequestsCount(pendingRequests.length);
+        })
+        .catch((error) => {
+          console.log("New request count error:", error);
+        });
+    };
+
+    loadNewRequests();
+
+    const interval = setInterval(loadNewRequests, 10000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
   const handleLogout = () => {
     signOut(auth);
+  };
+
+  const renderNavLabel = (link) => {
+    if (link.path === "/interested-students" && newRequestsCount > 0) {
+      return (
+        <span className="flex items-center gap-2">
+          {link.label}
+          <span className="bg-red-500 text-white text-[10px] min-w-5 h-5 px-1 rounded-full flex items-center justify-center">
+            {newRequestsCount}
+          </span>
+        </span>
+      );
+    }
+
+    return link.label;
   };
 
   return (
@@ -71,7 +117,7 @@ function App() {
                         : "text-slate-600 hover:bg-slate-100 hover:text-blue-600"
                     }`}
                   >
-                    {link.label}
+                    {renderNavLabel(link)}
                   </Link>
                 );
               })}
@@ -120,11 +166,18 @@ function App() {
                       : "text-slate-600 bg-slate-50"
                   }`}
                 >
-                  {link.label}
+                  {renderNavLabel(link)}
                 </Link>
               );
             })}
           </div>
+
+          {newRequestsCount > 0 && location.pathname !== "/interested-students" && (
+            <div className="fixed top-20 right-4 z-50 bg-white border border-slate-200 shadow-lg rounded-2xl px-4 py-3 text-sm">
+              🔔 You have {newRequestsCount} new request
+              {newRequestsCount > 1 ? "s" : ""}
+            </div>
+          )}
         </header>
       )}
 
