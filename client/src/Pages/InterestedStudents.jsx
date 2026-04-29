@@ -6,7 +6,7 @@ const InterestedStudents = ({ user }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5001/interested")
+    fetch(`${import.meta.env.VITE_API_URL}/interested`)
       .then((res) => res.json())
       .then((data) => {
         if (!user) return;
@@ -20,7 +20,7 @@ const InterestedStudents = ({ user }) => {
   }, [user]);
 
   const handleStatusUpdate = (id, newStatus) => {
-    fetch(`http://localhost:5001/interested/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/interested/${id}`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",

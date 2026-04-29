@@ -7,7 +7,7 @@ const MyRoutes = ({ user }) => {
   useEffect(() => {
     if (!user) return;
 
-    fetch("http://localhost:5001/routes")
+    fetch(`${import.meta.env.VITE_API_URL}/routes`)
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter((route) => route.email === user.email);
@@ -22,7 +22,7 @@ const MyRoutes = ({ user }) => {
 
     if (!confirmDelete) return;
 
-    fetch(`http://localhost:5001/routes/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/routes/${id}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -45,7 +45,7 @@ const MyRoutes = ({ user }) => {
 
     if (!confirmManaged) return;
 
-    fetch(`http://localhost:5001/routes/${id}/status`, {
+    fetch(`${import.meta.env.VITE_API_URL}/routes/${id}/status`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
@@ -82,7 +82,7 @@ const MyRoutes = ({ user }) => {
       phone: form.phone.value,
     };
 
-    fetch(`http://localhost:5001/routes/${editingRoute._id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/routes/${editingRoute._id}`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",

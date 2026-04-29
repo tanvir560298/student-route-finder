@@ -43,7 +43,7 @@ const AddRoute = () => {
       status: "open",
     };
 
-    fetch("http://localhost:5001/routes", {
+    fetch(`${import.meta.env.VITE_API_URL}/routes`,  {
       method: "POST",
       headers: {
         "content-type": "application/json",

@@ -4,7 +4,7 @@ const ManagedTrips = () => {
   const [trips, setTrips] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5001/routes")
+    fetch(`${import.meta.env.VITE_API_URL}/routes`)
       .then((res) => res.json())
       .then((data) => {
         const managedTrips = data.filter((trip) => trip.status === "managed");

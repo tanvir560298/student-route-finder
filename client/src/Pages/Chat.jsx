@@ -11,7 +11,7 @@ const Chat = ({ user }) => {
 
   useEffect(() => {
     const loadMessages = () => {
-      fetch(`http://localhost:5001/messages/${requestId}`)
+      fetch(`${import.meta.env.VITE_API_URL}/messages/${requestId}`)
         .then((res) => res.json())
         .then((data) => setMessages(data));
     };
@@ -40,7 +40,7 @@ const Chat = ({ user }) => {
       createdAt: new Date(),
     };
 
-    fetch("http://localhost:5001/messages", {
+    fetch(`${import.meta.env.VITE_API_URL}/messages`, {
       method: "POST",
       headers: {
         "content-type": "application/json",

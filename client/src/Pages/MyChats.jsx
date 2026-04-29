@@ -8,7 +8,7 @@ const MyChats = ({ user }) => {
   useEffect(() => {
     if (!user) return;
 
-    fetch("http://localhost:5001/interested")
+    fetch(`${import.meta.env.VITE_API_URL}/interested`)
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter(

@@ -8,14 +8,14 @@ const Profile = ({ user }) => {
   useEffect(() => {
     if (!user) return;
 
-    fetch("http://localhost:5001/routes")
+    fetch(`${import.meta.env.VITE_API_URL}/routes`)
       .then((res) => res.json())
       .then((data) => {
         const myTrips = data.filter((trip) => trip.email === user.email);
         setMyTripsCount(myTrips.length);
       });
 
-    fetch("http://localhost:5001/interested")
+    fetch(`${import.meta.env.VITE_API_URL}/interested`)
       .then((res) => res.json())
       .then((data) => {
         const myRequests = data.filter(

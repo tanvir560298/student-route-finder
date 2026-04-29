@@ -6,13 +6,13 @@ const AllRoutes = ({ user }) => {
   const [interestedData, setInterestedData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5001/routes")
+    fetch(`${import.meta.env.VITE_API_URL}/routes`)
       .then((res) => res.json())
       .then((data) => setRoutes(data));
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5001/interested")
+    fetch(`${import.meta.env.VITE_API_URL}/interested`)
       .then((res) => res.json())
       .then((data) => setInterestedData(data));
   }, []);
@@ -65,7 +65,7 @@ const AllRoutes = ({ user }) => {
       createdAt: new Date().toISOString(),
     };
 
-    fetch("http://localhost:5001/interested", {
+    fetch(`${import.meta.env.VITE_API_URL}/interested`,{
       method: "POST",
       headers: {
         "content-type": "application/json",
