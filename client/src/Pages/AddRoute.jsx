@@ -5,6 +5,7 @@ const AddRoute = () => {
   const [message, setMessage] = useState("");
   const [districts, setDistricts] = useState([]);
   const [districtInput, setDistrictInput] = useState("");
+  const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
   const [vehicleTypes, setVehicleTypes] = useState([]);
 
   useEffect(() => {
@@ -83,6 +84,7 @@ const AddRoute = () => {
           setMessage("Trip created successfully!");
           form.reset();
           setDistrictInput("");
+          setShowDistrictSuggestions(false);
           setVehicleTypes([]);
         }
       })
@@ -159,27 +161,36 @@ const AddRoute = () => {
 
               <input
                 value={districtInput}
-                onChange={(e) => setDistrictInput(e.target.value)}
+                onChange={(e) => {
+                  setDistrictInput(e.target.value);
+                  setShowDistrictSuggestions(true);
+                }}
+                onFocus={() => setShowDistrictSuggestions(true)}
                 placeholder="Search your district"
                 required
                 autoComplete="off"
                 className={inputClass}
               />
 
-              {districtInput && filteredDistricts.length > 0 && (
-                <div className="absolute z-50 mt-2 w-full max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
-                  {filteredDistricts.map((district) => (
-                    <button
-                      type="button"
-                      key={district}
-                      onClick={() => setDistrictInput(district)}
-                      className="block w-full text-left px-4 py-3 text-sm hover:bg-blue-50"
-                    >
-                      {district}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {showDistrictSuggestions &&
+                districtInput &&
+                filteredDistricts.length > 0 && (
+                  <div className="absolute z-50 mt-2 w-full max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                    {filteredDistricts.map((district) => (
+                      <button
+                        type="button"
+                        key={district}
+                        onMouseDown={() => {
+                          setDistrictInput(district);
+                          setShowDistrictSuggestions(false);
+                        }}
+                        className="block w-full text-left px-4 py-3 text-sm hover:bg-blue-50"
+                      >
+                        {district}
+                      </button>
+                    ))}
+                  </div>
+                )}
             </div>
 
             <div>
